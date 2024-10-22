@@ -1,0 +1,23 @@
+{
+  "name": "mernorebybackend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git remote add origin https://github.com/taufik69/mernorebyBackend-.git"
+  },
+  "author": "Mern 2306 online",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^4.0.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "mongoose": "^8.7.1",
+    "nodemon": "^3.1.7",
+    "prettier": "^3.3.3"
+  }
+}
