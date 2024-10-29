@@ -1,4 +1,4 @@
-export const template = (otp) => {
+const template = (otp) => {
   return `
 <html lang="en">
 <head>
@@ -85,3 +85,4 @@ export const template = (otp) => {
 </html>
 `;
 };
+module.exports = template;

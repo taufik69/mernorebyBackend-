@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 const emailTemplate = require("./Template.js");
 const transporter = nodemailer.createTransport({
-  service: true,
+  service: "gmail",
   port: 587,
   secure: false,
   auth: {
@@ -17,9 +17,7 @@ async function sendMail(userEmail, opt) {
     subject: "Verify Your Eamil ✔",
     html: emailTemplate(opt),
   });
-
-  console.log("Message sent: %s", info.messageId);
-  // Message sent: <d786aa62-4e0a-070a-47ed-0b0666549519@ethereal.email>
+  return info;
 }
 
 module.exports = { sendMail };

@@ -7,4 +7,12 @@ const makeHashPassword = async (plainPassword) => {
   }
 };
 
-module.exports = { makeHashPassword };
+const comparePaword = async (plainPassword, hashpassword) => {
+  try {
+    return bcrypt.compare(plainPassword, hashpassword);
+  } catch (error) {
+    console.log("Failed  to compare Password");
+  }
+};
+
+module.exports = { makeHashPassword, comparePaword };
