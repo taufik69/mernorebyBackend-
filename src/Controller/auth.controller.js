@@ -6,6 +6,7 @@ const userModel = require("../Model/user.model");
 const { makeHashPassword, comparePaword } = require("../Helpers/brycpt.js");
 const { numberGenerator } = require("../Helpers/numberGenerator.js");
 const { sendMail } = require("../Helpers/nodemailer.js");
+const { makeJWTToken } = require("../Helpers/JwtToken.js");
 const Registration = async (req, res) => {
   try {
     const { firstName, email, mobile, adress1, password } = req.body;
@@ -120,7 +121,34 @@ const login = async (req, res) => {
       password,
       loggedUser?.password
     );
-    console.log(isCorrectPassword);
+
+    if (!isCorrectPassword) {
+      return res
+        .status(401)
+        .json(new apiError(false, 401, null, "Login Credential invalid !!"));
+    }
+    const tokenPayload = {
+      id: loggedUser._id,
+      email: loggedUser.email,
+    };
+    const token = await makeJWTToken(tokenPayload);
+
+    if (token) {
+      return res
+        .status(200)
+        .cookie("token", token, { httpOnly: true, secure: true })
+        .json(
+          new apiResponse(
+            true,
+            {
+              token: `Bearer ${token}`,
+              userName: loggedUser.email,
+              userId: loggedUser._id,
+            },
+            "Login Sucessfull"
+          )
+        );
+    }
   } catch (error) {
     return res
       .status(501)
@@ -130,4 +158,16 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { Registration, verifyOtp, login };
+// make a logout controller
+const logout = async (req, res) => {
+  try {
+  } catch (error) {
+    return res
+      .status(501)
+      .json(
+        new apiError(false, null, `From logout controller Error :  ${error}`)
+      );
+  }
+};
+
+module.exports = { Registration, verifyOtp, login, logout };
