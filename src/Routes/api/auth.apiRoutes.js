@@ -5,11 +5,15 @@ const {
   verifyOtp,
   login,
   logout,
+  resetpassword,
+  setRecoveryEmail,
 } = require("../../Controller/auth.controller");
 const { authGuard } = require("../../middeware/authguard.middle");
 _.route("/auth/registration").post(Registration);
 _.route("/auth/verify-otp").post(verifyOtp);
 _.route("/auth/login").post(login);
 _.route("/auth/logout").get(authGuard, logout);
+_.route("/auth/reset-password").post(resetpassword);
+_.route("/auth/recovery-email").post(authGuard, setRecoveryEmail);
 
 module.exports = _;

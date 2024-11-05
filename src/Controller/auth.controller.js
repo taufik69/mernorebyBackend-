@@ -1,6 +1,10 @@
 const { apiResponse } = require("../Utils/ApiResponse.js");
 const { apiError } = require("../Utils/ApiError.js");
-const { mailChecker, passwordChecker } = require("../Helpers/validator");
+const {
+  mailChecker,
+  passwordChecker,
+  bdNumberchecker,
+} = require("../Helpers/validator");
 const userModel = require("../Model/user.model");
 
 const { makeHashPassword, comparePaword } = require("../Helpers/brycpt.js");
@@ -161,6 +165,10 @@ const login = async (req, res) => {
 // make a logout controller
 const logout = async (req, res) => {
   try {
+    return res
+      .status(200)
+      .clearCookie("token")
+      .json(new apiResponse(true, null, "Logout Sucessfull"));
   } catch (error) {
     return res
       .status(501)
@@ -170,4 +178,145 @@ const logout = async (req, res) => {
   }
 };
 
-module.exports = { Registration, verifyOtp, login, logout };
+// reset password controller
+const resetpassword = async (req, res) => {
+  try {
+    // const { emailorPhone, newspassword, oldPassword } = req.body;
+    for (let key in req.body) {
+      if (!req.body[key]) {
+        return res
+          .status(401)
+          .json(new apiError(false, 401, null, `${key}  Missing !!`));
+      }
+    }
+
+    if (!passwordChecker(req.body.newspassword)) {
+      return res
+        .status(401)
+        .json(new apiError(false, 401, null, `New Password Format invalid !!`));
+    }
+
+    // seach email or phone number in database
+    const CheckUser = await userModel.findOne({
+      $or: [
+        { mobile: req.body.emailorPhone },
+        { email: req.body.emailorPhone },
+      ],
+    });
+    // check old password
+    const passwordIsValid = comparePaword(
+      req.body.oldPassword,
+      CheckUser?.password
+    );
+    if (!CheckUser || !passwordIsValid) {
+      return res
+        .status(401)
+        .json(
+          new apiError(
+            false,
+            401,
+            null,
+            ` invalid Email or phone number or password !!`
+          )
+        );
+    }
+
+    // now  hash the new password
+    const hashNewPassword = await makeHashPassword(req.body.newspassword);
+    if (hashNewPassword) {
+      CheckUser.password = hashNewPassword;
+      await CheckUser.save();
+      return res.status(200).json(
+        new apiResponse(
+          true,
+          {
+            data: {
+              name: CheckUser.firstName,
+              email: CheckUser.email,
+            },
+          },
+          "Reset Password Sucessfull"
+        )
+      );
+    }
+    return res
+      .status(401)
+      .json(
+        new apiError(
+          false,
+          401,
+          null,
+          `User Not Found Email or phone number is or invalid !!`
+        )
+      );
+  } catch (error) {
+    return res
+      .status(501)
+      .json(
+        new apiError(
+          false,
+          null,
+          `From resetpassword controller Error :  ${error}`
+        )
+      );
+  }
+};
+
+// set a recovery mail
+const setRecoveryEmail = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const { recoveryEmail } = req.body;
+    if (!recoveryEmail || !mailChecker(recoveryEmail)) {
+      return res
+        .status(401)
+        .json(
+          new apiError(false, 401, null, "Recovery Email Missing or invalid !!")
+        );
+    }
+    // const recovery = await userModel.findOneAndUpdate(
+    //   { _id: userId },
+    //   { $set: { recoveryEmail: recoveryEmail } },
+    //   { new: true }
+    // );
+    const recovery = await userModel
+      .findOneAndUpdate({ _id: userId })
+      .select("-password -adress1 -mobile -role -Otp");
+    if (recovery.recoveryEmail === recoveryEmail) {
+      return res
+        .status(401)
+        .json(
+          new apiError(false, 401, null, "Already Recovery Email is Exist")
+        );
+    }
+
+    if (recovery) {
+      recovery.recoveryEmail = recoveryEmail;
+      await recovery.save();
+      return res
+        .status(200)
+        .json(new apiResponse(true, recovery, "recovery Eamil set Sucessfull"));
+    }
+    return res
+      .status(501)
+      .json(new apiError(false, 501, null, " Server error user not found !!"));
+  } catch (error) {
+    return res
+      .status(501)
+      .json(
+        new apiError(
+          false,
+          null,
+          `From setRecoveryEmail controller Error :  ${error}`
+        )
+      );
+  }
+};
+module.exports = {
+  Registration,
+  verifyOtp,
+  login,
+  logout,
+  resetpassword,
+  setRecoveryEmail,
+};
