@@ -2,7 +2,12 @@ const prouductModel = require("../Model/product.model.js");
 const { apiResponse } = require("../Utils/ApiResponse.js");
 const { apiError } = require("../Utils/ApiError.js");
 const { staticFileGenerator } = require("../Helpers/staticfileGenerator.js");
+const {
+  uploadCloudinaryFile,
+  deleteCloudinaryFile,
+} = require("../Utils/cloudinary.js");
 const NodeCache = require("node-cache");
+const productModel = require("../Model/product.model.js");
 const myCache = new NodeCache();
 // post product upload
 const createProduct = async (req, res) => {
@@ -21,7 +26,14 @@ const createProduct = async (req, res) => {
     }
 
     const allImage = req.files?.image;
-    const allImageWithDoamin = staticFileGenerator(allImage);
+    let allUploadedImg = [];
+    for (let image of allImage) {
+      let uploadFIle = await uploadCloudinaryFile(image?.path);
+      allUploadedImg.push(uploadFIle.secure_url);
+    }
+
+    // setup cloudinary
+    // const allImageWithDoamin = staticFileGenerator(allImage);
 
     const alreadyExistProdut = await prouductModel.find({ name: name });
     if (alreadyExistProdut?.length) {
@@ -35,7 +47,7 @@ const createProduct = async (req, res) => {
       price,
       category,
       subcategory,
-      image: allImageWithDoamin,
+      image: allUploadedImg,
     }).save();
 
     if (saveProducts) {
@@ -114,4 +126,71 @@ const getAllproducts = async (req, res) => {
   }
 };
 
-module.exports = { createProduct, getAllproducts };
+// const updateProduct  controller
+const updateProduct = async (req, res) => {
+  try {
+    const { productid } = req.params;
+    const isExistProduct = await productModel.findById(productid);
+    if (!isExistProduct) {
+      return res
+        .status(401)
+        .json(new apiError(false, null, `Product Not Found !!`));
+    }
+
+    let delete_resourcesCloudinary = null;
+    let allUploadedImg = [];
+    if (req.files?.image) {
+      for (let image of isExistProduct.image) {
+        const splitImageAdress = image.split("/");
+        const cloudinaryFilePath =
+          splitImageAdress[splitImageAdress.length - 1]?.split(".")[0];
+        delete_resourcesCloudinary =
+          await deleteCloudinaryFile(cloudinaryFilePath);
+      }
+
+      if (delete_resourcesCloudinary) {
+        for (let image of req.files?.image) {
+          let uploadFIle = await uploadCloudinaryFile(image?.path);
+          allUploadedImg.push(uploadFIle.secure_url);
+        }
+        const updateProduct = await productModel.findOneAndUpdate(
+          { _id: productid },
+          { ...req.body, image: allUploadedImg },
+          { new: true }
+        );
+        return res
+          .status(200)
+          .json(
+            new apiResponse(
+              true,
+              updateProduct,
+              "allProduct Retrived  Sucessfull"
+            )
+          );
+      }
+    }
+    //without image
+    const updateProduct = await productModel.findOneAndUpdate(
+      { _id: productid },
+      { ...req.body },
+      { new: true }
+    );
+    return res
+      .status(200)
+      .json(
+        new apiResponse(true, updateProduct, "allProduct Retrived  Sucessfull")
+      );
+  } catch (error) {
+    return res
+      .status(501)
+      .json(
+        new apiError(
+          false,
+          null,
+          `From update Product controller Error :  ${error}`
+        )
+      );
+  }
+};
+
+module.exports = { createProduct, getAllproducts, updateProduct };
