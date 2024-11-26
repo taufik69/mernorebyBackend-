@@ -192,5 +192,71 @@ const updateProduct = async (req, res) => {
       );
   }
 };
+// const getSingleProduct
+const getsingleProduct = async (req, res) => {
+  try {
+    const { productid } = req.params;
+    const singleProduct = await productModel
+      .findById(productid)
+      .populate(["category", "subcategory"])
+      .lean();
+    if (singleProduct) {
+      return res
+        .status(200)
+        .json(
+          new apiResponse(
+            true,
+            singleProduct,
+            "singleProduct Retrived  Sucessfull"
+          )
+        );
+    }
+    return res
+      .status(400)
+      .json(new apiError(false, null, `Single product retrive Failed`));
+  } catch (error) {
+    return res
+      .status(501)
+      .json(
+        new apiError(
+          false,
+          null,
+          `From update Product controller Error :  ${error}`
+        )
+      );
+  }
+};
 
-module.exports = { createProduct, getAllproducts, updateProduct };
+// const delteproduct
+const deleteProduct = async (req, res) => {
+  try {
+    const { productid } = req.params;
+    const delteProduct = await productModel.findOneAndDelete({
+      _id: productid,
+    });
+    if (delteProduct) {
+      return res
+        .status(200)
+        .json(new apiResponse(true, delteProduct, "product Delete Sucessfull"));
+    }
+    return res.status(401).json(new apiError(false, null, `Delte Failed`));
+  } catch (error) {
+    return res
+      .status(501)
+      .json(
+        new apiError(
+          false,
+          null,
+          `From  Delte  Product controller Error :  ${error}`
+        )
+      );
+  }
+};
+
+module.exports = {
+  createProduct,
+  getAllproducts,
+  updateProduct,
+  getsingleProduct,
+  deleteProduct,
+};
