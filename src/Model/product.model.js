@@ -20,9 +20,13 @@ const productSchema = new Schema(
     },
     stock: {
       type: Number,
+      required: true,
+      default: 0,
     },
     rating: {
       type: Number,
+      default: 0,
+      max: 5,
     },
     review: [
       {
@@ -49,6 +53,10 @@ const productSchema = new Schema(
         required: true,
       },
     ],
+    discount: {
+      type: Number,
+      default: 0,
+    },
   },
   { timeseries: true }
 );

@@ -48,6 +48,7 @@ const createProduct = async (req, res) => {
       category,
       subcategory,
       image: allUploadedImg,
+      ...req.body,
     }).save();
 
     if (saveProducts) {
