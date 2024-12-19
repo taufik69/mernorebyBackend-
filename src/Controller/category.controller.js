@@ -55,6 +55,7 @@ const createCategory = async (req, res) => {
 const getAllCategory = async (req, res) => {
   try {
     const allCategory = await categoryModel.find({}).populate("subCategory");
+
     if (!allCategory?.length) {
       return res
         .status(401)
@@ -82,7 +83,9 @@ const getAllCategory = async (req, res) => {
 const getSingleCategory = async (req, res) => {
   try {
     const { id } = req.params;
-    const singleCategory = await categoryModel.findById(id);
+    const singleCategory = await categoryModel
+      .findById(id)
+      .populate(["product", "subCategory"]);
     if (!singleCategory) {
       return res
         .status(401)

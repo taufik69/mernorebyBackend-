@@ -1,4 +1,5 @@
 const prouductModel = require("../Model/product.model.js");
+const categoryModel = require("../Model/category.model.js");
 const { apiResponse } = require("../Utils/ApiResponse.js");
 const { apiError } = require("../Utils/ApiError.js");
 const { staticFileGenerator } = require("../Helpers/staticfileGenerator.js");
@@ -50,8 +51,15 @@ const createProduct = async (req, res) => {
       image: allUploadedImg,
       ...req.body,
     }).save();
+    // revalidate the cached data from node cached
+    myCache.del("allproduct");
 
     if (saveProducts) {
+      // now save the prodcut in category
+      const seachCategroy = await categoryModel.findOne({ _id: category });
+      seachCategroy.product.push(saveProducts._id);
+      await seachCategroy.save();
+
       return res
         .status(200)
         .json(
