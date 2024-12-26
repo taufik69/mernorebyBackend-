@@ -13,14 +13,18 @@ const { sendMail } = require("../Helpers/nodemailer.js");
 const { makeJWTToken } = require("../Helpers/JwtToken.js");
 const Registration = async (req, res) => {
   try {
-    const { firstName, email, mobile, adress1, password } = req.body;
-    if (!firstName || !email || !mobile || !adress1 || !password) {
+    const { firstName, email, mobile, password } = req.body;
+    if (!firstName || !email || !mobile || !password) {
       return res
         .status(401)
         .json(new apiError(false, 401, null, "User Credential Missing !!"));
     }
     // check if email or password format is right or wrong
-    if (!mailChecker(email) || !passwordChecker(password)) {
+    if (
+      !mailChecker(email) ||
+      !passwordChecker(password) ||
+      bdNumberchecker(mobile)
+    ) {
       return res
         .status(401)
         .json(
@@ -50,7 +54,6 @@ const Registration = async (req, res) => {
       firstName,
       email,
       mobile,
-      adress1,
       password: hashpassword,
       Otp: otp,
     }).save();

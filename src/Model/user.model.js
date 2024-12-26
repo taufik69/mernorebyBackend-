@@ -20,14 +20,12 @@ const userSchema = new Schema(
     },
     mobile: {
       type: String,
-      required: [true, "mobile Missing !!"],
       trim: true,
       max: [11, "max length is 11"],
       min: [11, "minx length is 11"],
     },
     adress1: {
       type: String,
-      required: [true, "adress1 Missing !!"],
       trim: true,
     },
     adress2: {
