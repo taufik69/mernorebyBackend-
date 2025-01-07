@@ -15,7 +15,7 @@ async function sendMail(userEmail, opt) {
     from: process.env.EMAIL,
     to: userEmail,
     subject: "Verify Your Eamil ✔",
-    html: emailTemplate(opt),
+    html: emailTemplate(opt , userEmail),
   });
   return info;
 }

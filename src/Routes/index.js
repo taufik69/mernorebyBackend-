@@ -7,6 +7,8 @@ const productApiRoutes = require("./api/product.apiRoutes.js");
 const bannerApiRoutes = require("./api/banner.apiRoutes.js");
 const flashSaleApiRouts = require("./api/flashSale.apiRoutes.js");
 const bestSellingApiRouts = require("./api/bestSelling.apiRoutes.js");
+const contactApiRoutes = require("./api/contact.apiRoutes.js");
+const cartapiRoutes = require("./api/cart.api.js");
 const baseApi = process.env.BASE_API;
 _.use(baseApi, registraionRoutes);
 _.use(baseApi, categoryApiRoutes);
@@ -15,6 +17,8 @@ _.use(baseApi, productApiRoutes);
 _.use(baseApi, bannerApiRoutes);
 _.use(baseApi, flashSaleApiRouts);
 _.use(baseApi, bestSellingApiRouts);
+_.use(baseApi, contactApiRoutes);
+_.use(baseApi, cartapiRoutes);
 _.use("*", (req, res) => {
   return res.status(404).json({
     sucess: false,

@@ -81,6 +81,12 @@ const userSchema = new Schema(
       type: String,
       default: null,
     },
+    cartitem: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Cart",
+      },
+    ],
   },
   {
     timestamps: true,

@@ -1,4 +1,4 @@
-const template = (otp) => {
+const template = (otp, userEmail) => {
   return `
 <html lang="en">
 <head>
@@ -69,12 +69,10 @@ const template = (otp) => {
         </div>
 
         <div style="text-align: center;">
-            <a href="http:localhost:5157/verify-acount" class="verify-button">Verify My Account</a>
+            <a href="http://localhost:5173/otpverify/${userEmail}" class="verify-button">Verify My Account</a>
         </div>
 
-        <p>If the button above doesn't work, copy and paste the following link into your browser:</p>
-        <p><a href="[Insert Verification URL]">[Insert Verification URL]</a></p>
-
+    
         <div class="footer">
             <p>If you didn’t request this email, please ignore it or contact our support team.</p>
             <p>Thank you, <br>The Oreby Team</p>

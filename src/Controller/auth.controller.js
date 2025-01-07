@@ -23,7 +23,7 @@ const Registration = async (req, res) => {
     if (
       !mailChecker(email) ||
       !passwordChecker(password) ||
-      bdNumberchecker(mobile)
+      !bdNumberchecker(mobile)
     ) {
       return res
         .status(401)
@@ -42,6 +42,8 @@ const Registration = async (req, res) => {
     const otp = await numberGenerator();
 
     const isSendMail = await sendMail(email, otp);
+    console.log(isSendMail);
+
     if (!isSendMail?.response) {
       return res
         .status(501)
@@ -63,6 +65,7 @@ const Registration = async (req, res) => {
     //   saveUserData.save();
     //   console.log("opt removed");
     // }, 10000 * 10);
+
     return res
       .status(200)
       .json(new apiResponse(true, saveUserData, "Registratin Sucessfull"));
