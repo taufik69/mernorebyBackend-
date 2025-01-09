@@ -51,4 +51,76 @@ const addToCart = async (req, res) => {
       );
   }
 };
-module.exports = { addToCart };
+
+// cart item in user
+const getCartItemuser = async (req, res) => {
+  try {
+    const user = req.user;
+    const allCartItem = await cartModel
+      .find({ user: user.userId })
+      .populate({
+        path: "product",
+      })
+      .populate({
+        path: "user",
+        select: "-password -Otp -cartitem -role -isVerified -recoveryEmail",
+      });
+    if (!allCartItem?.length) {
+      return res
+        .status(501)
+        .json(new apiError(false, null, `Cart Item NOt Found !`));
+    }
+    let totalItem = 0;
+    let totalQuantity = 0;
+    allCartItem?.map((item) => {
+      const { product, quantity } = item;
+      totalItem += parseInt(product.price) * parseInt(quantity);
+      totalQuantity += quantity;
+    });
+
+    return res.status(200).json(
+      new apiResponse(
+        true,
+        {
+          allCartItem: allCartItem,
+          totalAmount: totalItem,
+          totalQuantity: totalQuantity,
+        },
+
+        "Add to cart retrive Sucessfull",
+        false
+      )
+    );
+  } catch (error) {
+    return res
+      .status(501)
+      .json(
+        new apiError(
+          false,
+          null,
+          `getCartItemuser addToCart controller Error :  ${error}`
+        )
+      );
+  }
+};
+
+// increment quantitiy
+const incrementCartItem = async (req, res) => {
+  try {
+    const { cartid } = req.params;
+    const cartItem = await cartModel.findById(cartid);
+    cartItem.quantity += 1;
+    await cartItem.save();
+    return res
+      .status(200)
+      .json(new apiResponse(true, cartItem, "Add to cart Sucessfull", false));
+  } catch (error) {
+    return res
+      .status(501)
+      .json(
+        new apiError(false, null, `From increment controller Error :  ${error}`)
+      );
+  }
+};
+
+module.exports = { addToCart, getCartItemuser, incrementCartItem };
