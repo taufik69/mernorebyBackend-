@@ -3,6 +3,7 @@ const { apiError } = require("../Utils/ApiError");
 const authGuard = async (req, res, next) => {
   try {
     const { token } = req.cookies;
+
     if (token || req.headers.authorization) {
       const decoded = await jwt.verify(
         token || req.headers.authorization,
@@ -23,7 +24,7 @@ const authGuard = async (req, res, next) => {
         .json(new apiError(false, 401, null, "Token Invalid !!"));
     }
   } catch (error) {
-    console.log("Error from authGuard Middleware", error.code);
+    console.log("Error from authGuard Middleware", error);
   }
 };
 module.exports = { authGuard };

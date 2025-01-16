@@ -5,9 +5,13 @@ const {
   addToCart,
   getCartItemuser,
   incrementCartItem,
+  decrementCartItem,
+  userCart,
 } = require("../../Controller/cart.controller.js");
 
 _.route("/addtocart").post(authGuard, addToCart);
 _.route("/getuseritem").get(authGuard, getCartItemuser);
-_.route("/increment/:cartid").post(incrementCartItem);
+_.route("/increment/:cartid").post(authGuard, incrementCartItem);
+_.route("/decrement/:cartid").post(authGuard, decrementCartItem);
+_.route("/useritem").get(authGuard, userCart);
 module.exports = _;
