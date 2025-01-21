@@ -10,6 +10,7 @@ const bestSellingApiRouts = require("./api/bestSelling.apiRoutes.js");
 const contactApiRoutes = require("./api/contact.apiRoutes.js");
 const cartapiRoutes = require("./api/cart.api.js");
 const orderapiRoutes = require("./api/order.apiRoutes.js");
+const paymentRoutes = require("./api/payment.apiroutes.js");
 const baseApi = process.env.BASE_API;
 _.use(baseApi, registraionRoutes);
 _.use(baseApi, categoryApiRoutes);
@@ -21,6 +22,7 @@ _.use(baseApi, bestSellingApiRouts);
 _.use(baseApi, contactApiRoutes);
 _.use(baseApi, cartapiRoutes);
 _.use(baseApi, orderapiRoutes);
+_.use(baseApi, paymentRoutes);
 _.use("*", (req, res) => {
   return res.status(404).json({
     sucess: false,
