@@ -19,7 +19,6 @@ const cartSchmea = new Schema({
   },
   color: {
     type: String,
-
     default: null,
   },
 

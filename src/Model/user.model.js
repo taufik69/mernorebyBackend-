@@ -81,6 +81,9 @@ const userSchema = new Schema(
       type: String,
       default: null,
     },
+    otpExpire: {
+      type: Number,
+    },
     cartitem: [
       {
         type: Schema.Types.ObjectId,

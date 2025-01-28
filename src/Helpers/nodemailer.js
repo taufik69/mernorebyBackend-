@@ -10,12 +10,12 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-async function sendMail(userEmail, opt) {
+async function sendMail(userEmail, opt, msg) {
   const info = await transporter.sendMail({
     from: process.env.EMAIL,
     to: userEmail,
-    subject: "Verify Your Eamil ✔",
-    html: emailTemplate(opt , userEmail),
+    subject: msg || "Verify Your email ✔",
+    html: emailTemplate(opt, userEmail),
   });
   return info;
 }

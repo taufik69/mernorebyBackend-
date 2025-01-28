@@ -4,8 +4,9 @@ const cartModel = require("../Model/cart.model.js");
 const userModel = require("../Model/user.model.js");
 const addToCart = async (req, res) => {
   try {
-    const { user, product, size, color, quantity } = req.body;
-    if (!user || !product || !quantity) {
+    const { product, size, color, quantity } = req.body;
+
+    if (!product || !quantity) {
       return res
         .status(400)
         .json(
@@ -25,7 +26,7 @@ const addToCart = async (req, res) => {
 
     // now save the cart information
     const saveCart = await new cartModel({
-      user,
+      user: req.user.userId,
       product,
       size,
       color,
@@ -37,7 +38,7 @@ const addToCart = async (req, res) => {
         .json(new apiError(false, null, `Add to cart Failed`));
     }
     // search the user of user database
-    const users = await userModel.findOne({ _id: user });
+    const users = await userModel.findOne({ _id: req.user.userId });
     users.cartitem.push(saveCart._id);
     await users.save();
     return res
@@ -170,20 +171,18 @@ const userCart = async (req, res) => {
       { totalAmount: 0, totalQuantity: 0 }
     );
 
-    return res
-      .status(200)
-      .json(
-        new apiResponse(
-          true,
-          {
-            cartITem,
-            totalamount: totalpriceofCart.totalAmount,
-            totalcartitem: totalpriceofCart.totalQuantity,
-          },
-          "Add to cart Sucessfull",
-          false
-        )
-      );
+    return res.status(200).json(
+      new apiResponse(
+        true,
+        {
+          cartITem,
+          totalamount: totalpriceofCart.totalAmount,
+          totalcartitem: totalpriceofCart.totalQuantity,
+        },
+        "Add to cart Sucessfull",
+        false
+      )
+    );
   } catch (error) {
     return res
       .status(501)

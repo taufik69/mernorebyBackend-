@@ -69,7 +69,7 @@ const template = (otp, userEmail) => {
         </div>
 
         <div style="text-align: center;">
-            <a href="http://localhost:5173/otpverify/${userEmail}" class="verify-button">Verify My Account</a>
+            <a href="http://localhost:5173/otpverify/${userEmail}" target="_blank" class="verify-button">Verify My Account</a>
         </div>
 
     

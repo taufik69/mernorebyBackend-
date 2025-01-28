@@ -52,19 +52,15 @@ const Registration = async (req, res) => {
         );
     }
     // now save the data to database
+    const otpExpireTime = new Date().getTime() + 10 * 60 * 1000;
     const saveUserData = await new userModel({
       firstName,
       email,
       mobile,
       password: hashpassword,
       Otp: otp,
+      otpExpire: otpExpireTime,
     }).save();
-
-    // setTimeout(() => {
-    //   saveUserData.Otp = null;
-    //   saveUserData.save();
-    //   console.log("opt removed");
-    // }, 10000 * 10);
 
     return res
       .status(200)
@@ -77,36 +73,96 @@ const Registration = async (req, res) => {
 // verify otp
 const verifyOtp = async (req, res) => {
   try {
-    const { email, otp } = req.body;
-    if (!email || !otp) {
+    const { email, Otp } = req.body;
+    if (!email || !Otp) {
       return res
         .status(401)
-        .json(new apiError(false, 401, null, "Otp Credential Missing !!"));
+        .json(new apiError(false, `Your email or Otp Missing!!`, 401, null));
     }
-    const isExistUser = await userModel
-      .findOne({
-        $and: [{ email: email }, { Otp: otp }],
-      })
-      .select("-password -email");
 
-    if (!isExistUser) {
-      return res
-        .status(401)
-        .json(new apiError(false, 401, null, "User not found!"));
+    const checkIsUserAlradyRegister = await userModel.findOne({ email: email });
+
+    if (checkIsUserAlradyRegister) {
+      if (
+        checkIsUserAlradyRegister.Otp === parseInt(Otp) &&
+        new Date().getTime() <= checkIsUserAlradyRegister.otpExpire
+      ) {
+        // remove otp and otpExpireTime removed from database
+        checkIsUserAlradyRegister.Otp = null;
+        checkIsUserAlradyRegister.otpExpire = null;
+        checkIsUserAlradyRegister.isVerified = true;
+        await checkIsUserAlradyRegister.save();
+
+        return res
+          .status(200)
+          .json(new apiResponse(false, "User Verified Sucessfull", 200, null));
+      } else {
+        // remove otp and otpExpireTime removed from database
+        checkIsUserAlradyRegister.Otp = null;
+        checkIsUserAlradyRegister.otpExpire = null;
+        await checkIsUserAlradyRegister.save();
+
+        return res
+          .status(401)
+          .json(
+            new apiResponse(false, "Otp Not Match or time expired ", 200, null)
+          );
+      }
     }
-    isExistUser.isVerified = true;
-    isExistUser.Otp = null;
-    isExistUser.save();
-
-    //
-    return res
-      .status(200)
-      .json(new apiResponse(true, isExistUser, "Otp Verified Sucessfull"));
   } catch (error) {
     return res
       .status(501)
       .json(
-        new apiError(false, null, `From verify controller Error :  ${error}`)
+        new apiError(
+          false,
+          `Error from verifyOtp controller  ${error}`,
+          501,
+          null
+        )
+      );
+  }
+};
+
+// resend otp
+const resendOpt = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const isRegisterUser = await userModel.findOne({ email });
+    if (!isRegisterUser) {
+      return res
+        .status(501)
+        .json(new apiError(false, `Email Not Found `, 501, null));
+    }
+
+    // now save the data to database
+    const otpExpireTime = new Date().getTime() + 10 * 60 * 1000;
+    // generate new Otp
+    const otp = await numberGenerator();
+    // now send mail
+    const sendemail = await sendMail(email, otp, "Resend Opt");
+    if (sendemail) {
+      isRegisterUser.Otp = otp;
+      isRegisterUser.otpExpire = otpExpireTime;
+      await isRegisterUser.save();
+      return res
+        .status(200)
+        .json(
+          new apiResponse(false, "Otp Resend Sucessfull Check email", 200, null)
+        );
+    }
+    return res
+      .status(501)
+      .json(new apiError(false, `Otp Resend Failed !!`, 501, null));
+  } catch (error) {
+    return res
+      .status(501)
+      .json(
+        new apiError(
+          false,
+          `Error from resendOpt controller  ${error}`,
+          501,
+          null
+        )
       );
   }
 };
@@ -324,4 +380,5 @@ module.exports = {
   logout,
   resetpassword,
   setRecoveryEmail,
+  resendOpt,
 };

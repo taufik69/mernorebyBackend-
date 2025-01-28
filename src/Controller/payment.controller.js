@@ -18,7 +18,7 @@ const sucessPayment = async (req, res) => {
     const order = await orderModel.findById(invoice.orderId);
     order.paymentinfo.isPaid = true;
     await order.save();
-    return res.json(new apiResponse(true, order, `Payment Success`));
+    return res.redirect(`${process.env.FRONTEND_DOMAIN}/Success`);
   } catch (error) {
     return res.json(new apiError(false, null, `Payment Fail`));
   }
@@ -38,7 +38,7 @@ const failPayment = async (req, res) => {
     const order = await orderModel.findById(invoice.orderId);
     order.paymentinfo.isPaid = false;
     await order.save();
-    return res.json(new apiResponse(true, order, `Payment Success`));
+    return res.redirect(`${process.env.FRONTEND_DOMAIN}/failed`);
   } catch (error) {
     return res.json(new apiError(false, null, `Payment Fail`));
   }
@@ -61,7 +61,7 @@ const canclePayment = async (req, res) => {
     const order = await orderModel.findById(invoice.orderId);
     order.paymentinfo.isPaid = false;
     await order.save();
-    return res.json(new apiResponse(true, order, `Payment Success`));
+    return res.redirect(`${process.env.FRONTEND_DOMAIN}/cancel`);
   } catch (error) {
     return res.json(new apiError(false, null, `Payment Fail`));
   }
@@ -70,7 +70,7 @@ const canclePayment = async (req, res) => {
 const ipn = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const invoice = await invoice.findOne({ tran_id: id });
     if (!invoice) {
       return res.json(new apiError(false, null, `Order not found`));
@@ -82,7 +82,7 @@ const ipn = async (req, res) => {
     order.paymentinfo.isPaid = true;
     await order.save();
 
-    return res.json(new apiResponse(true, order, `Payment Success`));
+    res.redirect(`http://localhost:5173/cancel`);
   } catch (error) {
     return res.json(new apiError(false, null, `Payment Fail`));
   }
