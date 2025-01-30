@@ -190,10 +190,45 @@ const userCart = async (req, res) => {
   }
 };
 
+const deleteCartItem = async (req, res) => {
+  try {
+    const { cartId } = req.query;
+
+    const deletedCartItem = await cartModel.findOneAndDelete({
+      _id: cartId,
+      user: req.user.userId, // Ensuring only the owner can delete
+    });
+
+    if (!deletedCartItem) {
+      return res
+        .status(404)
+        .json(new apiError(false, null, "Cart item not found"));
+    }
+
+    return res
+      .status(200)
+      .json(
+        new apiResponse(
+          true,
+          { deletedCartItem },
+          "Cart item deleted successfully",
+          false
+        )
+      );
+  } catch (error) {
+    return res
+      .status(500)
+      .json(
+        new apiError(false, null, `deleteCartItem controller Error: ${error}`)
+      );
+  }
+};
+
 module.exports = {
   addToCart,
   getCartItemuser,
   incrementCartItem,
   decrementCartItem,
   userCart,
+  deleteCartItem,
 };
