@@ -2,7 +2,8 @@ const { apiResponse } = require("../Utils/ApiResponse.js");
 const { apiError } = require("../Utils/ApiError.js");
 const invoiceModel = require("../Model/invoice.model.js");
 const orderModel = require("../Model/order.model");
-
+const cartModel = require("../Model/cart.model.js");
+const userModel = require("../Model/user.model.js");
 const sucessPayment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -16,11 +17,21 @@ const sucessPayment = async (req, res) => {
 
     // now find the order db and update the payment status
     const order = await orderModel.findById(invoice.orderId);
+    const userinfo = await userModel.findById(invoice.user_id);
+    order.cartItem.forEach(async (item) => {
+      await userinfo.cartitem.pull(item);
+      await cartModel.findOneAndDelete({ _id: item });
+    });
+    await userinfo.save();
+    console.log(userinfo.cartitem);
+
     order.paymentinfo.isPaid = true;
     await order.save();
     return res.redirect(`${process.env.FRONTEND_DOMAIN}/Success`);
   } catch (error) {
-    return res.json(new apiError(false, null, `Payment Fail`));
+    console.log(error);
+
+    return res.json(new apiError(false, 500, error, `Payment Fail`));
   }
 };
 const failPayment = async (req, res) => {

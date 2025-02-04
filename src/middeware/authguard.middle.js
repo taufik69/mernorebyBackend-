@@ -12,7 +12,7 @@ const authGuard = async (req, res, next) => {
           userId: decoded.id,
           useremail: decoded.email,
         };
-        req.user = user;
+        req.user = { ...user, token: req.cookies.token };
         next();
       }
     }
@@ -28,12 +28,17 @@ const authGuard = async (req, res, next) => {
           userId: decoded.id,
           useremail: decoded.email,
         };
-        req.user = user;
+        req.user = {
+          ...user,
+          token: req.headers.authorization.replace("Bearer", "").trim(),
+        };
         next();
       }
     }
   } catch (error) {
-    console.log("Error from authGuard Middleware", error);
+    res.status(500).json({
+      message: "token expire",
+    });
   }
 };
 module.exports = { authGuard };

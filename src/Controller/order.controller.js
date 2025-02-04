@@ -13,8 +13,8 @@ const is_live = process.env.ISLIVE == false; //true or false
 
 const placeorder = async (req, res) => {
   try {
-    const { userId } = req.user;
-    const token = req.headers.authorization.replace("Bearer", "").trim();
+    const { userId, token } = req.user;
+
     const { customerinfo, paymentinfo } = req.body;
     const { address1, town, district } = customerinfo;
     const { payementmethod } = paymentinfo;
@@ -32,7 +32,7 @@ const placeorder = async (req, res) => {
     // Get cart items by user
     const response = await fetch("http://localhost:3000/api/v1/useritem", {
       headers: {
-        Authorization: token, // Add the token here
+        Authorization: `Bearer ${token}`, // Add the token here
         "Content-Type": "application/json", // Optional: Set content type
       },
     });
