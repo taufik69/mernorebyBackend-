@@ -10,6 +10,7 @@ const myCache = new NodeCache();
 const createBanner = async (req, res) => {
   try {
     const { name } = req.body;
+
     if (!req.files?.image || !name) {
       return res
         .status(401)
