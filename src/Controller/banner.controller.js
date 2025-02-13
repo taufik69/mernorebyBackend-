@@ -132,6 +132,7 @@ const updateBanner = async (req, res) => {
       { ...updateobj },
       { new: true }
     );
+    myCache.del("banner");
     if (updateBanner) {
       return res
         .status(200)
