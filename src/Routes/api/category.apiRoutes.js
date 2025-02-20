@@ -5,7 +5,11 @@ const {
   getAllCategory,
   getSingleCategory,
   updateCategory,
+  deleteCategory,
 } = require("../../Controller/category.controller");
 _.route("/category").post(createCategory).get(getAllCategory);
-_.route("/category/:id").get(getSingleCategory).patch(updateCategory);
+_.route("/category/:id")
+  .get(getSingleCategory)
+  .put(updateCategory)
+  .delete(deleteCategory);
 module.exports = _;

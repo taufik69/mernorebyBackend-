@@ -141,9 +141,39 @@ const updateCategory = async (req, res) => {
   }
 };
 
+const deleteCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deletedCategory = await categoryModel.findByIdAndDelete(id);
+
+    if (!deletedCategory) {
+      return res
+        .status(404)
+        .json(new apiResponse(false, null, "Category not found", true));
+    }
+
+    return res
+      .status(200)
+      .json(
+        new apiResponse(
+          true,
+          deletedCategory,
+          "Category deleted successfully",
+          false
+        )
+      );
+  } catch (error) {
+    return res
+      .status(500)
+      .json(new apiError(false, null, `Error deleting category: ${error}`));
+  }
+};
+
 module.exports = {
   createCategory,
   getAllCategory,
   getSingleCategory,
   updateCategory,
+  deleteCategory,
 };

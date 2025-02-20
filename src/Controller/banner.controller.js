@@ -156,4 +156,36 @@ const updateBanner = async (req, res) => {
       );
   }
 };
-module.exports = { createBanner, getAllBanner, updateBanner };
+
+const deleteBanner = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deletedBanner = await bannerModel.findByIdAndDelete(id);
+
+    if (!deletedBanner) {
+      return res
+        .status(404)
+        .json(new apiResponse(false, null, "Banner not found", true));
+    }
+
+    myCache.del("banner"); // Invalidate cache
+
+    return res
+      .status(200)
+      .json(
+        new apiResponse(
+          true,
+          deletedBanner,
+          "Banner deleted successfully",
+          false
+        )
+      );
+  } catch (error) {
+    return res
+      .status(500)
+      .json(new apiError(false, null, `Error deleting banner: ${error}`));
+  }
+};
+
+module.exports = { createBanner, getAllBanner, updateBanner, deleteBanner };
